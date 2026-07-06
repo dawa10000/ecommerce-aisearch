@@ -3,6 +3,7 @@ const nextConfig = {
   /* config options here */
   reactCompiler: true,
   instrumentationHook: true,
+  serverExternalPackages: ["@xenova/transformers"],
 };
 
 export default nextConfig;

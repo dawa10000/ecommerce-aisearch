@@ -1,16 +1,23 @@
-import { pipeline } from "@xenova/transformers";
+import { pipeline, env } from "@xenova/transformers";
 import connectDB from "../../../lib/db.js";
 import Product from "../../../models/Product.js";
 
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
+
+env.cacheDir = "/tmp/.cache";
+env.allowLocalModels = false;
+env.useFSCache = true;
+env.useBrowserCache = false;
 
 const MAX_QUERY_LENGTH = 200;
 const GROQ_TIMEOUT_MS = 2500;
 const MIN_SCORE = 0.65;
 const RESULT_LIMIT = 20;
 const NUM_CANDIDATES = 200;
-const QUERY_CACHE_TTL_MS = 10 * 60 * 1000;
+const QUERY_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const QUERY_CACHE_MAX_ENTRIES = 500;
-
 
 let embedderPromise;
 function getEmbedder() {
@@ -86,7 +93,6 @@ Query: ${query}`,
     const text = data?.choices?.[0]?.message?.content?.trim();
     return text || query;
   } catch (err) {
-
     console.warn("expandQuery fallback:", err.message);
     return query;
   } finally {
@@ -122,7 +128,6 @@ export async function POST(request) {
       return Response.json([], { status: 200 });
     }
 
-
     const filter = buildFilter(body);
     const cacheKey = JSON.stringify({ q: query.toLowerCase(), filter });
 
@@ -130,7 +135,6 @@ export async function POST(request) {
     if (cached) {
       return Response.json(cached);
     }
-
 
     const expandedQuery = await expandQuery(query);
     const queryVector = await generateVector(expandedQuery);
@@ -163,10 +167,10 @@ export async function POST(request) {
 
     const startTime = Date.now();
     const products = await Product.aggregate(pipeline_);
+    const endTime = Date.now();
+    console.log(`Query executed in ${endTime - startTime} ms`);
 
     setCached(cacheKey, products);
-    const endTime = Date.now();
-    console.log(`Query executed in ${endTime - startTime} ms`)
     return Response.json(products);
   } catch (error) {
     console.error("Search API error:", error);
