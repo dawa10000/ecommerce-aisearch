@@ -20,14 +20,14 @@ export default function Navbar() {
           AI Ecommerce App
         </Link>
 
-        <nav className="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 p-1 shadow-sm">
+        <nav className="flex items-center gap-1  bg-slate-50 p-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={`rounded-full px-3 py-2 text-sm font-medium transition ${link.href === "/cart"
-                  ? "text-amber-700 hover:bg-amber-100"
-                  : "text-slate-600 hover:bg-white hover:text-slate-900"
+                ? "text-amber-700 hover:bg-amber-100"
+                : "text-slate-600 hover:bg-white hover:text-slate-900"
                 }`}
             >
               {link.label}
